@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Altur Test Studio</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>🎙️ Altur Test Studio</h1>
+    <p class="subtitle">Construye una llamada de prueba, revisa qué turnos detecta el VAD, y mándala al endpoint <code>/detect</code>.</p>
+  </header>
+
+  <main class="layout">
+
+    <!-- PASO 1: subir clips -->
+    <section class="card">
+      <h2><span class="step">1</span> Sube tus clips de audio</h2>
+      <p class="hint">Cada archivo es un turno de la conversación (una frase del llamante o del agente). Cualquier formato/sample rate está bien, se remuestrea automáticamente a 8kHz.</p>
+      <div id="dropzone" class="dropzone">
+        <span>Arrastra archivos aquí, o haz clic para elegirlos</span>
+        <input type="file" id="fileInput" multiple accept="audio/*" hidden>
+      </div>
+      <div id="clipList" class="clip-list"></div>
+    </section>
+
+    <!-- PASO 2: timeline -->
+    <section class="card">
+      <h2><span class="step">2</span> Arma el timeline</h2>
+      <p class="hint">Arrastra cada bloque para fijar cuándo empieza a hablar. Usa el botón ⇄ para cambiar el canal (llamante ↔ agente). El overlay de abajo muestra los turnos que detectaría el VAD.</p>
+
+      <div class="timeline-ruler" id="ruler"></div>
+
+      <div class="lane-group">
+        <div class="lane-label">🧑 Canal 0 · Llamante</div>
+        <div class="lane" id="lane0"></div>
+        <div class="lane-overlay" id="overlay0"></div>
+      </div>
+      <div class="lane-group">
+        <div class="lane-label">🏦 Canal 1 · Agente</div>
+        <div class="lane" id="lane1"></div>
+        <div class="lane-overlay" id="overlay1"></div>
+      </div>
+
+      <div class="zoom-control">
+        <label>Zoom del timeline</label>
+        <input type="range" id="zoomSlider" min="5" max="60" value="20">
+        <span id="zoomValue">20 px/s</span>
+      </div>
+    </section>
+
+    <!-- PASO 3: parámetros del VAD -->
+    <section class="card">
+      <h2><span class="step">3</span> Parámetros del VAD</h2>
+      <p class="hint">Los mismos parámetros que usa <code>vad.py</code> en producción. Ajusta y pulsa "Recalcular turnos" para ver el efecto inmediatamente en el timeline de arriba.</p>
+
+      <div class="param-grid">
+        <div class="param">
+          <label>Duración de ventana (frame_ms)</label>
+          <input type="range" id="p_frame_ms" min="10" max="60" step="5" value="30">
+          <span class="param-value" id="v_frame_ms">30 ms</span>
+        </div>
+        <div class="param">
+          <label>Umbral de energía (thresh_db)</label>
+          <input type="range" id="p_thresh_db" min="-60" max="-15" step="1" value="-38">
+          <span class="param-value" id="v_thresh_db">-38 dB</span>
+        </div>
+        <div class="param">
+          <label>Habla mínima (min_speech)</label>
+          <input type="range" id="p_min_speech" min="0.05" max="1" step="0.05" value="0.2">
+          <span class="param-value" id="v_min_speech">0.20 s</span>
+        </div>
+        <div class="param">
+          <label>Silencio mínimo para cortar (min_sil)</label>
+          <input type="range" id="p_min_sil" min="0.05" max="1" step="0.05" value="0.25">
+          <span class="param-value" id="v_min_sil">0.25 s</span>
+        </div>
+        <div class="param">
+          <label>Margen sobre piso de ruido (noise_margin)</label>
+          <input type="range" id="p_noise_margin" min="3" max="30" step="1" value="12">
+          <span class="param-value" id="v_noise_margin">12 dB</span>
+        </div>
+      </div>
+
+      <div class="preset-row">
+        <span class="hint">Presets rápidos:</span>
+        <button class="btn-ghost" data-preset="default">Default del repo (-38dB)</button>
+        <button class="btn-ghost" data-preset="tuned">Ajustado del proyecto (-46dB)</button>
+      </div>
+    </section>
+
+    <!-- PASO 4: construir y escuchar -->
+    <section class="card">
+      <h2><span class="step">4</span> Construir y previsualizar</h2>
+      <div class="button-row">
+        <button id="buildBtn" class="btn-primary">🛠️ Construir WAV</button>
+        <button id="turnsBtn" class="btn-secondary" disabled>🔍 Recalcular turnos</button>
+      </div>
+      <div id="buildResult" class="build-result"></div>
+      <audio id="player" controls class="audio-player" style="display:none"></audio>
+    </section>
+
+    <!-- PASO 5: enviar -->
+    <section class="card">
+      <h2><span class="step">5</span> Enviar a <code>/detect</code></h2>
+      <div class="endpoint-row">
+        <label>Endpoint</label>
+        <select id="endpointPreset">
+          <option value="http://localhost:8000/detect">Local (localhost:8000)</option>
+          <option value="custom">Personalizado…</option>
+        </select>
+        <input type="text" id="endpointCustom" placeholder="https://tu-app.onrender.com/detect" style="display:none">
+      </div>
+      <button id="sendBtn" class="btn-primary" disabled>🚀 Enviar</button>
+
+      <div id="sendResult" class="send-result"></div>
+    </section>
+
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
