@@ -99,6 +99,16 @@
       </div>
       <div id="buildResult" class="build-result"></div>
       <audio id="player" controls class="audio-player" style="display:none"></audio>
+
+      <div class="export-row" id="exportRow" style="display:none">
+        <span class="hint" style="margin:10px 0 0">Exportar para probar en otro lado:</span>
+        <div class="button-row">
+          <button id="downloadWavBtn" class="btn-ghost">💾 Descargar WAV</button>
+          <button id="copyB64Btn" class="btn-ghost">📋 Copiar Base64</button>
+          <button id="downloadPayloadBtn" class="btn-ghost">📄 Descargar payload JSON</button>
+        </div>
+        <div id="exportStatus" class="export-status"></div>
+      </div>
     </section>
 
     <!-- PASO 5: enviar -->

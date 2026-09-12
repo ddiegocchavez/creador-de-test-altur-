@@ -194,9 +194,67 @@ document.getElementById("buildBtn").addEventListener("click", async () => {
 
     document.getElementById("turnsBtn").disabled = false;
     document.getElementById("sendBtn").disabled = false;
+    document.getElementById("exportRow").style.display = "block";
   } catch (err) {
     resultEl.innerHTML = `<span class="error-text">${err.message}</span>`;
   }
+});
+
+// ---------- exportar ----------
+function base64ToBlob(base64, mimeType) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mimeType });
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function showExportStatus(msg) {
+  const el = document.getElementById("exportStatus");
+  el.textContent = msg;
+  setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 2500);
+}
+
+document.getElementById("downloadWavBtn").addEventListener("click", () => {
+  if (!lastWavBase64) return;
+  const blob = base64ToBlob(lastWavBase64, "audio/wav");
+  downloadBlob(blob, "llamada_prueba.wav");
+  showExportStatus("✓ WAV descargado");
+});
+
+document.getElementById("copyB64Btn").addEventListener("click", async () => {
+  if (!lastWavBase64) return;
+  try {
+    await navigator.clipboard.writeText(lastWavBase64);
+    showExportStatus(`✓ Base64 copiado al portapapeles (${lastWavBase64.length.toLocaleString()} caracteres)`);
+  } catch {
+    // fallback si el navegador bloquea la API del portapapeles
+    const textarea = document.createElement("textarea");
+    textarea.value = lastWavBase64;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    textarea.remove();
+    showExportStatus("✓ Base64 copiado (modo compatibilidad)");
+  }
+});
+
+document.getElementById("downloadPayloadBtn").addEventListener("click", () => {
+  if (!lastWavBase64) return;
+  const payload = JSON.stringify({ audio: lastWavBase64, format: "wav" }, null, 2);
+  const blob = new Blob([payload], { type: "application/json" });
+  downloadBlob(blob, "llamada_prueba_payload.json");
+  showExportStatus("✓ payload.json descargado — listo para curl o send_to_detect.py");
 });
 
 // ---------- recalcular turnos (overlay del VAD) ----------

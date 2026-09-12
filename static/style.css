@@ -253,6 +253,9 @@ body {
 .build-result .ok { color: var(--good); }
 .audio-player { width: 100%; margin-top: 10px; }
 
+.export-row { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--card-border); }
+.export-status { font-size: 12px; color: var(--good); margin-top: 8px; min-height: 16px; }
+
 /* Endpoint + send */
 .endpoint-row {
   display: flex;

@@ -11,6 +11,10 @@ Servidor local con interfaz visual para:
    exige el endpoint del proyecto).
 5. Mandarlo en base64 a un `POST /detect` (local o público) y ver el
    veredicto, la confianza y la latencia con una interfaz clara.
+6. **Exportar** el resultado para probarlo en otro lugar: descargar el
+   `.wav` tal cual, copiar el base64 crudo al portapapeles, o descargar un
+   `payload.json` (`{"audio": "...", "format": "wav"}`) listo para usarse
+   con `curl -d @payload.json ...` o con el script `send_to_detect.py`.
 
 ## Arrancar
 
